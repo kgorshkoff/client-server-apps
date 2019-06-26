@@ -1,1 +1,25 @@
-{"orders": []}
+{
+    "orders": [
+        {
+            "item": "Keyboard",
+            "quantity": 5,
+            "price": 200,
+            "buyer": "Ivan",
+            "date": "30.05.2018"
+        },
+        {
+            "item": "Monitor",
+            "quantity": 11,
+            "price": 200,
+            "buyer": "Max",
+            "date": "30.05.2018"
+        },
+        {
+            "item": "Mouse",
+            "quantity": 114,
+            "price": 50,
+            "buyer": "George",
+            "date": "30.05.2018"
+        }
+    ]
+}
