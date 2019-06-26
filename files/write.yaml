@@ -1,1 +1,8 @@
-{first: [one, two, three], second: 123, third: {¥: yen, €: euro}}
+first:
+- one
+- two
+- three
+second: 123
+third:
+  ¥: yen
+  €: euro
