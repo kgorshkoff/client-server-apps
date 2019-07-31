@@ -1,4 +1,4 @@
-from ..protocol import make_response
+from ..protocol.py import make_response
 
 
 def server_error_controller(request):

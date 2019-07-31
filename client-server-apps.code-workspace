@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.envFile": "~/PycharmProjects/client-server-apps/.env",
+		"python.pythonPath": "~/PycharmProjects/client-server-apps/.env/bin/python"
+	}
+}

@@ -1,5 +1,5 @@
 from datetime import datetime
-from ..protocol import make_response
+from protocol import make_response
 
 
 def server_date_controller(request):

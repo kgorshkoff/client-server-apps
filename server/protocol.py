@@ -3,7 +3,7 @@ def validate_request(raw):
         return True
     return False
 
-    
+
 def make_response(request, code, data=None):
     return {
         'action': request.get('action'),
