@@ -3,8 +3,9 @@ import logging
 import yaml
 from argparse import ArgumentParser
 from socket import socket
-from resolvers import resolve
-from protocol import validate_request, make_response
+from .log.server_log_config import logger
+from server.resolvers import resolve
+from server.protocol import validate_request, make_response
 
 
 parser = ArgumentParser()
@@ -34,17 +35,6 @@ if args.config:
         default_config.update(file_config)
 
 host, port = default_config.get('host'), default_config.get('port')
-
-logger = logging.getLogger('main')
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-handler = logging.FileHandler('main.log')
-handler.setFormatter(formatter)
-handler.setLevel(logging.DEBUG)
-
-logger.addHandler(handler)
 
 try:
     sock = socket()

@@ -5,7 +5,7 @@
 		}
 	],
 	"settings": {
-		"python.envFile": "~/PycharmProjects/client-server-apps/.env",
-		"python.pythonPath": "~/PycharmProjects/client-server-apps/.env/bin/python"
+		"python.envFile": "~/.virtualenvs/client-server-apps/",
+		"python.pythonPath": "~/.virtualenvs/client-server-apps/bin/python"
 	}
 }
