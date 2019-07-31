@@ -1,13 +1,15 @@
-import os, sys
 import json
 from socket import socket
 from argparse import ArgumentParser
 import yaml
 from resolvers import resolve
 from protocol import validate_request, make_response
-from logs import log
+from log import server_log_config as log
 
-sys.path.append(os.path.dirname(__file__))
+import sys
+sys.path.append('/Users/kirill/PycharmProjects/client-server-apps/')
+
+print(sys.path)
 
 parser = ArgumentParser()
 parser.add_argument(
