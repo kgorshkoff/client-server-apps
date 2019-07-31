@@ -1,6 +1,6 @@
 from .controllers import server_date_controller
 
 
-actionnames =[
+actionnames = [
     {'action': 'serverdate', 'controller': server_date_controller}
 ]

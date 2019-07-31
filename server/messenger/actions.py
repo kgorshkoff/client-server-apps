@@ -1,6 +1,6 @@
 # from .controllers import echo_controller
 
 
-ACTIONNAMES = [
+actionname = [
     {'action': 'messenger', 'controller': 'empty controller'},
 ]
