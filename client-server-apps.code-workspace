@@ -5,7 +5,8 @@
 		}
 	],
 	"settings": {
-		"python.envFile": "~/.virtualenvs/client-server-apps/",
-		"python.pythonPath": "~/.virtualenvs/client-server-apps/bin/python"
+		"python.envFile": "~/.virtualenvs/client-server-apps",
+		"python.pythonPath": "~/PycharmProjects/clients-server-apps",
+		"terminal.integrated.env.osx": {"PYTHONPATH": "~/PycharmProjects/client-server-apps/"}
 	}
 }

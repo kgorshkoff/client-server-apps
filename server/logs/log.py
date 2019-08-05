@@ -8,7 +8,7 @@ logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-handler = logging.FileHandler(os.getcwd() + f'/server/logs/{datetime.today().strftime("%Y%m%d")}_server_main.log')
+handler = logging.FileHandler(f'server/{datetime.today().strftime("%Y%m%d")}_server_main.log')
 
 handler.setFormatter(formatter)
 handler.setLevel(logging.DEBUG)

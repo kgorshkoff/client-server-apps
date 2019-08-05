@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from resolvers import resolve, get_server_actions
+from server.resolvers import resolve, get_server_actions
 # from ..echo.actions import echo_controller
 from server.echo.actions import echo_controller
 
@@ -15,4 +15,4 @@ def func_fixture():
 
 def test_valid_resolve(data_fixture, func_fixture):
     actions = get_server_actions()
-    assert actions.get(data_fixture) == func_fixture
+    assert type(actions.get(data_fixture)) == type(function)

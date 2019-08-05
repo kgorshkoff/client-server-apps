@@ -1,7 +1,8 @@
 import yaml
 import json
 import datetime
-from logs import log
+import hashlib
+import logging
 from socket import socket
 from datetime import datetime
 from argparse import ArgumentParser
@@ -33,29 +34,46 @@ if args.config:
         file_config = yaml.load(file, Loader=yaml.Loader)
         default_config.update(file_config)
 
-log.logger.debug(f'Client started with next settings {default_config}')
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('main.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+
+
+logging.debug(f'Client started with next settings {default_config}')
 
 host, port = default_config.get('host'), default_config.get('port')
 sock = socket()
 sock.connect((host, port))
 
-log.logger.info(f'Client started and connected to {host}:{port}')
+logging.info(f'Client started and connected to {host}:{port}')
 
 action = input('Enter action: ')
 data = input('Enter data: ')
 
+hash_obj = hashlib.sha256()
+hash_obj.update(
+    str(datetime.now().timestamp()).encode()
+)
+
 request = {
     'action': action,
     'time': datetime.now().timestamp(),
-    'data': data
+    'data': data,
+    'token': hash_obj.hexdigest()
 }
 
 s_request = json.dumps(request)
 
 sock.send(s_request.encode())
-log.logger.debug(f'Client sent data: {s_request}')
+logging.debug(f'Client sent data: {s_request}')
 b_response = sock.recv(default_config.get('buffersize'))
 response = b_response.decode()
-log.logger.debug(f'Client recieved response: {response}')
+logging.debug(f'Client recieved response: {response}')
 print(response)
-log.logger.info('Client closed')
+logging.info('Client closed')

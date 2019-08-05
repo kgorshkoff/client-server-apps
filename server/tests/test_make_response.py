@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from protocol import make_response
+from server.protocol import make_response
 
 
 @pytest.fixture

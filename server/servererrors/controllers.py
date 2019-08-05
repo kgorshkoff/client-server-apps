@@ -1,6 +1,7 @@
-from protocol import make_response
-from logs import log
+from server.protocol import make_response
+from server.decorators import login_required
 
+
+@login_required
 def server_error_controller(request):
-    log.logger.debug('User generated server error')
     raise Exception('Server error message')
