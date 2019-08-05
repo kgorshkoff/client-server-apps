@@ -3,6 +3,7 @@
 notebook/
 .ipynb_checkpoints
 .DS_Store
+client-server-apps.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

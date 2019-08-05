@@ -6,6 +6,7 @@ def validate_request(raw):
 
 def make_response(request, code, data=None):
     return {
+        'username': request.get('username'),
         'action': request.get('action'),
         'time': request.get('time'),
         'data': data,

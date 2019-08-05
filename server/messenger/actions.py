@@ -1,6 +1,6 @@
-# from .controllers import echo_controller
+from .controllers import messenger_controller
 
 
-actionname = [
-    {'action': 'messenger', 'controller': 'empty controller'},
+actionnames = [
+    {'action': 'messenger', 'controller': messenger_controller},
 ]
