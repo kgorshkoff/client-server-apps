@@ -6,7 +6,6 @@ import yaml
 from server.resolvers import resolve
 from server.protocol import validate_request, make_response
 import logging
-# from server.logs import log
 
 
 parser = ArgumentParser()
