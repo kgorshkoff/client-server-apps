@@ -1,5 +1,6 @@
 import os
 import json
+import threading
 from datetime import datetime
 from socket import socket
 from argparse import ArgumentParser
@@ -10,6 +11,24 @@ from server.handlers import handle_default_request
 from server.protocol import validate_request, make_response
 import logging
 # from server.logs import log
+
+
+def read(sock, connections, requests, buffersize):
+    try:
+        b_request = sock.recv(buffersize)
+    except Exception:
+        connections.remove(sock)
+    else:
+        if b_request:
+            requests.append(b_request)
+
+
+def write(sock, connections, response):
+    try:
+        sock.send(response)
+    except Exception:
+        connections.remove(sock)
+
 
 
 parser = ArgumentParser()
@@ -52,6 +71,7 @@ logging.basicConfig(
 requests = []
 connections = []
 
+
 try:
     sock = socket()
     sock.bind((host, port))
@@ -73,15 +93,20 @@ try:
         )
 
         for r_client in rlist:
-            b_request = r_client.recv(default_config.get('buffersize'))
-            requests.append(b_request)
+            r_thread = threading.Thread(
+                target=read, args=(r_client, connections, requests, default_config.get('buffersize'))
+                )
+            r_thread.start()
 
         if requests:
             b_request = requests.pop()
             b_response = handle_default_request(b_request)
 
             for w_client in wlist:
-                w_client.send(b_response)
+                w_thread = threading.Thread(
+                target=write, args=(w_client, connections, b_response)
+                )
+                w_thread.start()
 
 
 except KeyboardInterrupt:
