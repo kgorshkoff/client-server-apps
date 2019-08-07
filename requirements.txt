@@ -1,7 +1,2 @@
 jupyter
 chardet
-pyyaml
-requests
-pytest
-pytest-cov
-fabric3
