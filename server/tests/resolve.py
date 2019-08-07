@@ -1,7 +1,6 @@
 import pytest
 from datetime import datetime
 from server.resolvers import resolve, get_server_actions
-# from ..echo.actions import echo_controller
 from server.echo.actions import echo_controller
 
 @pytest.fixture
