@@ -63,7 +63,9 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log', encoding='utf-8'),
+        logging.FileHandler(
+            os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log', encoding='utf-8'
+            ),
         logging.StreamHandler()
     ]
 )
