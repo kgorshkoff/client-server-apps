@@ -63,6 +63,30 @@ class Client:
                     )
             else:
                 print(response)
+                
+    def write(self):
+        while True:
+            hash_obj = hashlib.sha256()
+            hash_obj.update(
+                str(datetime.now().timestamp()).encode()
+            )
+    
+            action = input('Enter action: ')
+            data = input('Enter data: ')
+    
+            request = {
+                'username': self.username,
+                'action': action,
+                'time': datetime.now().timestamp(),
+                'data': data,
+                'token': hash_obj.hexdigest()
+            }
+    
+            s_request = json.dumps(request)
+            b_request = zlib.compress(s_request.encode())
+    
+            client.sock.send(b_request)
+            logging.debug(f'Client sent data: {data}')
 
 
 parser = ArgumentParser()
@@ -102,28 +126,9 @@ try:
     read_thread = threading.Thread(target=client.read)
     read_thread.start()
     
-    while True:
-        hash_obj = hashlib.sha256()
-        hash_obj.update(
-            str(datetime.now().timestamp()).encode()
-        )
-
-        action = input('Enter action: ')
-        data = input('Enter data: ')
-
-        request = {
-            'username': client.username,
-            'action': action,
-            'time': datetime.now().timestamp(),
-            'data': data,
-            'token': hash_obj.hexdigest()
-        }
-
-        s_request = json.dumps(request)
-        b_request = zlib.compress(s_request.encode())
-
-        client.sock.send(b_request)
-        logging.debug(f'Client sent data: {data}')
+    write_thread = threading.Thread(target=client.write)
+    write_thread.start()
+    
 except KeyboardInterrupt:
     Client.sock.close()
     print('Client closed')
