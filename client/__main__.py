@@ -28,22 +28,41 @@ class TypedProperty:
     def __delete__(self, instance):
         raise AttributeError("Невозможно удалить атрибут")
 
-def read(sock, buffersize):
-    while True:
-        compressed_response = sock.recv(buffersize)
-        b_response = zlib.decompress(compressed_response)
-        response = b_response.decode()
 
-        logging.debug(f'Client recieved response: {response}')
+class Client:
+    def __init__(self):
+        self.host = TypedProperty('host', str, args.host if args.host else 'localhost')
+        self.port = TypedProperty('port', int, args.port if args.port else 8000)
+        self.buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
+        self.log_path = TypedProperty('log_path', str, os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_client_main.log')
+        
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[logging.FileHandler(self.log_path.default)]
+        )
 
-        if 'messenger' in response:
-            json_response = json.loads(response)
-            print(
-                f"{datetime.fromtimestamp(json_response.get('time')).strftime('%H:%M:%S')} | \
-                    {json_response.get('username')}: {json_response.get('data')}"
-                )
-        else:
-            print(response)
+    def run(self):
+        self.username = input('Enter your name: ')   
+        self.sock = socket()
+        self.sock.connect((self.host.default, self.port.default))
+        
+    def read(self):
+        while True:
+            compressed_response = self.sock.recv(self.buffersize.default)
+            b_response = zlib.decompress(compressed_response)
+            response = b_response.decode()
+
+            logging.debug(f'Client recieved response: {response}')
+
+            if 'messenger' in response:
+                json_response = json.loads(response)
+                print(
+                    f"{datetime.fromtimestamp(json_response.get('time')).strftime('%H:%M:%S')} | \
+                        {json_response.get('username')}: {json_response.get('data')}"
+                    )
+            else:
+                print(response)
 
 
 parser = ArgumentParser()
@@ -71,30 +90,17 @@ if args.config:
         for k, v in file_config.items():
             args.__setattr__(k, v)
 
-class Config:
-    host = TypedProperty('host', str, args.host if args.host else 'localhost')
-    port = TypedProperty('port', int, args.port if args.port else 8000)
-    buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
-    log_path = TypedProperty('log_path', str, os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_client_main.log')
 
+client = Client()
+client.run()
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler(Config.log_path)]
-)
+logging.info(f'Client started and connected to {client.host.default}:{client.port.default}')
 
-sock = socket()
-sock.connect((Config.host, Config.port))
-
-logging.info(f'Client started and connected to {Config.host}:{Config.port}')
 print('Welcome to geek-chat!')
 
 try:
-    read_thread = threading.Thread(target=read, args=(sock, Config.buffersize))
+    read_thread = threading.Thread(target=client.read)
     read_thread.start()
-
-    username = input('Enter your name: ')
     
     while True:
         hash_obj = hashlib.sha256()
@@ -106,7 +112,7 @@ try:
         data = input('Enter data: ')
 
         request = {
-            'username': username,
+            'username': client.username,
             'action': action,
             'time': datetime.now().timestamp(),
             'data': data,
@@ -116,8 +122,8 @@ try:
         s_request = json.dumps(request)
         b_request = zlib.compress(s_request.encode())
 
-        sock.send(b_request)
+        client.sock.send(b_request)
         logging.debug(f'Client sent data: {data}')
 except KeyboardInterrupt:
-    sock.close()
+    Client.sock.close()
     print('Client closed')
