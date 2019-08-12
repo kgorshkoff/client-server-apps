@@ -10,7 +10,24 @@ from server.resolvers import resolve
 from server.handlers import handle_default_request
 from server.protocol import validate_request, make_response
 import logging
-# from server.logs import log
+
+
+class TypedProperty:
+    def __init__(self, name, type_name, default=None):
+        self.name = "_" + name
+        self.type = type_name
+        self.default = default if default else type_name()
+
+    def __get__(self, instance, cls):
+        return getattr(instance, self.name, self.default)
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self.type):
+            raise TypeError("Значение должно быть типа %s" % self.type)
+        setattr(instance, self.name, value)
+
+    def __delete__(self, instance):
+        raise AttributeError("Невозможно удалить атрибут")
 
 
 def read(sock, connections, requests, buffersize):
@@ -30,7 +47,6 @@ def write(sock, connections, response):
         connections.remove(sock)
 
 
-
 parser = ArgumentParser()
 parser.add_argument(
     '-c', '--config', type=str,
@@ -44,29 +60,33 @@ parser.add_argument(
     '-p', '--port', type=str,
     required=False, help='set server port'
 )
-args = parser.parse_args()
+parser.add_argument(
+    '-b', '--buffersize', type=str,
+    required=False, help='set server buffersize'
+)
 
-default_config = {
-    'host': 'localhost',
-    'port': 8000,
-    'buffersize': 1024
-}
+args = parser.parse_args()
 
 if args.config:
     with open(args.config) as file:
         file_config = yaml.load(file, Loader=yaml.Loader)
-        default_config.update(file_config)
+        for k, v in file_config.items():
+            args.__setattr__(k, v)
 
-host, port = default_config.get('host'), default_config.get('port')
+class Config:
+    host = TypedProperty('host', str, args.host if args.host else 'localhost')
+    port = TypedProperty('port', int, args.port if args.port else 8000)
+    buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
+    log_path = TypedProperty('log_path', str, os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log')
+
 
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log', encoding='utf-8'),
-        logging.StreamHandler()
+    handlers=[logging.FileHandler(Config.log_path), logging.StreamHandler()
     ]
 )
+
 
 requests = []
 connections = []
@@ -74,11 +94,11 @@ connections = []
 
 try:
     sock = socket()
-    sock.bind((host, port))
+    sock.bind((Config.host, Config.port))
     sock.settimeout(0)
     sock.listen(5)
 
-    logging.info(f'Server is running {host}:{port}')
+    logging.info(f'Server is running {Config.host}:{Config.port}')
 
     while True:
         try:
@@ -94,7 +114,7 @@ try:
 
         for r_client in rlist:
             r_thread = threading.Thread(
-                target=read, args=(r_client, connections, requests, default_config.get('buffersize'))
+                target=read, args=(r_client, connections, requests, Config.buffersize)
                 )
             r_thread.start()
 
