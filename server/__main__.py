@@ -29,22 +29,45 @@ class TypedProperty:
     def __delete__(self, instance):
         raise AttributeError("Невозможно удалить атрибут")
 
+        
+class Server:
+    def __init__(self):
+        self._host = TypedProperty('host', str, args.host if args.host else 'localhost')
+        self._port = TypedProperty('port', int, args.port if args.port else 8000)
+        self._buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
+        self._log_path = TypedProperty('log_path', str, os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log')
+        
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(self._log_path.default), logging.StreamHandler()
+            ]
+        )
 
-def read(sock, connections, requests, buffersize):
-    try:
-        b_request = sock.recv(buffersize)
-    except Exception:
-        connections.remove(sock)
-    else:
-        if b_request:
-            requests.append(b_request)
+    requests = []
+    connections = []
+    
+    def run(self):
+        self.sock = socket()
+        self.sock.bind((self._host.default, self._port.default))
+        self.sock.settimeout(0)
+        self.sock.listen(5)
 
+    def read(self, sock):
+        try:
+            b_request = sock.recv(self._buffersize.default)
+        except Exception:
+            self.connections.remove(sock)
+        else:
+            if b_request:
+                self.requests.append(b_request)
 
-def write(sock, connections, response):
-    try:
-        sock.send(response)
-    except Exception:
-        connections.remove(sock)
+    def write(self, sock, response):
+        try:
+            sock.send(response)
+        except Exception:
+            self.connections.remove(sock)
 
 
 parser = ArgumentParser()
@@ -64,7 +87,6 @@ parser.add_argument(
     '-b', '--buffersize', type=str,
     required=False, help='set server buffersize'
 )
-
 args = parser.parse_args()
 
 if args.config:
@@ -73,58 +95,38 @@ if args.config:
         for k, v in file_config.items():
             args.__setattr__(k, v)
 
-class Config:
-    host = TypedProperty('host', str, args.host if args.host else 'localhost')
-    port = TypedProperty('port', int, args.port if args.port else 8000)
-    buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
-    log_path = TypedProperty('log_path', str, os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log')
-
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler(Config.log_path), logging.StreamHandler()
-    ]
-)
-
-
-requests = []
-connections = []
-
 
 try:
-    sock = socket()
-    sock.bind((Config.host, Config.port))
-    sock.settimeout(0)
-    sock.listen(5)
+    server = Server()
+    server.run()
 
-    logging.info(f'Server is running {Config.host}:{Config.port}')
+    logging.info(f'Server is running {server._host.default}:{server._port.default}')
 
     while True:
         try:
-            client, address = sock.accept()
-            connections.append(client)
-            logging.info(f'Client connected: {address[0]}:{address[1]} | connections: {len(connections)}')
+            client, address = server.sock.accept()
+            server.connections.append(client)
+            logging.info(f'Client connected: {address[0]}:{address[1]} | connections: {len(server.connections)}')
         except:
             pass
 
         rlist, wlist, xlist = select.select(
-            connections, connections,  connections, 0
+            server.connections, server.connections,  server.connections, 0
         )
 
         for r_client in rlist:
             r_thread = threading.Thread(
-                target=read, args=(r_client, connections, requests, Config.buffersize)
+                target=server.read, args=(r_client, )
                 )
             r_thread.start()
 
-        if requests:
-            b_request = requests.pop()
+        if server.requests:
+            b_request = server.requests.pop()
             b_response = handle_default_request(b_request)
 
             for w_client in wlist:
                 w_thread = threading.Thread(
-                target=write, args=(w_client, connections, b_response)
+                target=server.write, args=(w_client, b_response)
                 )
                 w_thread.start()
 
