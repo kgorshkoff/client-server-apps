@@ -1,29 +1,13 @@
-import os
-from sqlalchemy import create_engine, Table, String, Integer, DateTime, Column, MetaData
-from sqlalchemy.orm import mapper
+from datetime import datetime
+from sqlalchemy import Column, Integer, DateTime, String
 
-engine = create_engine(f'sqlite:///{os.path.dirname(os.path.abspath(__file__))}/sqlite.db')
-metadata = MetaData()
-
-responses = Table(
-    'responses', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('username', String),
-    Column('action', String),
-    Column('datetime', DateTime),
-    Column('data', String),
-    Column('code', Integer)
-)
-
-metadata.create_all(engine)
-
-class Response:
-    def __init__(self, username, action, datetime, data, code):
-        self.username = username
-        self.action = action
-        self.datetime = datetime
-        self.data = data
-        self.code = code
+from server.database import Base
 
 
-mapper(Response, responses)
+class Response(Base):
+    __tablename__ = 'responses'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    data = Column(String, nullable=True)
+    created = Column(DateTime, default=datetime.now())
+    username = Column(String)

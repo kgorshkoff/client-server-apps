@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 from argparse import ArgumentParser
-from client.app import Client
+from client.app import Application
 
 
 parser = ArgumentParser()
@@ -39,5 +39,6 @@ logging.basicConfig(
 )
 
 
-client = Client(args)
-client.run()
+with Application(args) as client:
+    client.connect()
+    client.run()

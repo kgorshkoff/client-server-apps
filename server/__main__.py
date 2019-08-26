@@ -7,6 +7,7 @@ from datetime import datetime
 from argparse import ArgumentParser
 from server.app import Server
 from server.handlers import handle_default_request
+from server.database import engine, Base
 
 
 parser = ArgumentParser()
@@ -25,6 +26,10 @@ parser.add_argument(
 parser.add_argument(
     '-b', '--buffersize', type=str,
     required=False, help='set server buffersize'
+)
+parser.add_argument(
+    '-m', '--migrate', action='store_true',
+    required=False, help='migrates database'
 )
 args = parser.parse_args()
 
@@ -45,16 +50,13 @@ logging.basicConfig(
     )   
 
 
-if not os.path.exists(os.path.dirname(os.path.abspath(__file__)) + '/sqlite.db'):
-    engine = create_engine(f'sqlite:///{os.path.dirname(os.path.abspath(__file__))}/sqlite.db')
-    metadata = MetaData()
-    metadata.create_all(engine)
+if args.migrate:
+    Base.metadata.create_all(engine)
+else:
+    app = Server(
+        args=args, 
+        handler=handle_default_request
+        )
 
-
-app = Server(
-    args=args, 
-    handler=handle_default_request
-    )
-
-app.bind()
-app.run()
+    app.bind()
+    app.run()

@@ -3,6 +3,9 @@ from fabric.api import local
 
 def server():
     local('python server')
+    
+def migrate():
+    local('python server --migrate')
 
 def client():
     local(f'python client')
