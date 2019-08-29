@@ -19,7 +19,7 @@ def read_user_controller(request):
     data = request.get('data')
 
     session = Session()
-    query = session.query(User, data)
+    query = session.query(User).filter_by('name')
     
     return make_response(request, 200, query)
 
