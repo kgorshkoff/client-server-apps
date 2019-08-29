@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from server.app import Server
 from server.handlers import handle_default_request
 from server.database import engine, Base
-
+from server.settings import INSTALLED_MODULES, BASE_DIR
 
 parser = ArgumentParser()
 parser.add_argument(
@@ -51,6 +51,11 @@ logging.basicConfig(
 
 
 if args.migrate:
+    module_name_list = [f'{item}.models' for item in INSTALLED_MODULES]
+    module_path_list = (os.path.join(BASE_DIR, item, 'models.py') for item in INSTALLED_MODULES)
+    for index, path in enumerate(module_path_list):
+        if os.path.exists(path):
+            __import__(module_name_list[index])
     Base.metadata.create_all(engine)
 else:
     app = Server(
