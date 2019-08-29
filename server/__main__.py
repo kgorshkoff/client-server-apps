@@ -5,10 +5,11 @@ from sqlalchemy import create_engine, Table, String, Integer, Column, MetaData
 from sqlalchemy.orm import mapper
 from datetime import datetime
 from argparse import ArgumentParser
-from server.app import Server
-from server.handlers import handle_default_request
-from server.database import engine, Base
-from server.settings import INSTALLED_MODULES, BASE_DIR
+from app import Server
+from handlers import handle_default_request
+from database import engine, Base
+from settings import INSTALLED_MODULES, BASE_DIR
+
 
 parser = ArgumentParser()
 parser.add_argument(

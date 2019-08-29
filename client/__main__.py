@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import datetime
 from argparse import ArgumentParser
-from client.app import Application
+from app import Application
 
 
 parser = ArgumentParser()

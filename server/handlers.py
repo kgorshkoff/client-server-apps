@@ -1,9 +1,9 @@
 import json
 import logging
 
-from server.middleware import compression_middleware, encryption_middleware
-from server.resolvers import resolve
-from server.protocol import make_response, validate_request
+from middleware import compression_middleware, encryption_middleware
+from resolvers import resolve
+from protocol import make_response, validate_request
 
 
 @compression_middleware

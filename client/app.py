@@ -6,7 +6,7 @@ import zlib
 from socket import socket
 from datetime import datetime
 
-from client.protocol import make_request
+from protocol import make_request
 
 
 class TypedProperty:

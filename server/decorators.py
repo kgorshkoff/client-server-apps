@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from server.protocol import make_response
+from protocol import make_response
 
 
 logger = logging.getLogger('decorators')

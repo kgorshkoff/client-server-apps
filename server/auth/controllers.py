@@ -1,6 +1,6 @@
-from server.database import Session
-from .models import User
-from server.protocol import make_response
+from database import Session
+from auth.models import User
+from protocol import make_response
 
 
 def create_user_controller(request):
