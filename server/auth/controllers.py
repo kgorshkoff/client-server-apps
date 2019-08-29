@@ -25,14 +25,19 @@ def read_user_controller(request):
 
 
 def update_user_controller(request):
-    pass
+    user_id = request.get('user_id')
+    user_password = request.get('user_password')
+    session = Session()
+    query = session.query(User).filter(id=user_id).get()
+    query.password = user_password
+    return 
 
 
 def delete_user_controller(request):
     data = request.get('data')
 
     session = Session()
-    session.query(User, data).delete()
+    session.query(User).filter_by('name').delete()
     session.commit()
     
     return make_response(request, 200, 'Deleted')
