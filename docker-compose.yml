@@ -3,7 +3,7 @@ version: '3'
 services:
   server:
     build: ./server
-    command: python .
+    command: python . -c config.yml
     volumes:
       - ./server:/app
     ports:
@@ -11,7 +11,7 @@ services:
 
   client:
     build: ./client
-    command: python .
+    command: python . -c config.yml
     volumes:
       - ./client:/app
     depends_on:

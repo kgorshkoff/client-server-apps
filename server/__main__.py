@@ -45,7 +45,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(
-            os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log'), 
+            BASE_DIR + '/logs/' + datetime.today().strftime("%Y%m%d") + '_server_main.log'),
         logging.StreamHandler()
             ]
     )   
