@@ -1,5 +1,5 @@
-from server.protocol import make_response
-from server.decorators import login_required
+from protocol import make_response
+from decorators import login_required
 
 
 @login_required

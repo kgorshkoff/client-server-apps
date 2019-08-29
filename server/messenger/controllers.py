@@ -1,5 +1,5 @@
-from server.protocol import make_response
-from server.decorators import logged
+from protocol import make_response
+from decorators import logged
 
 
 # @logged

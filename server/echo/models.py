@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, DateTime, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from database import Base
-from auth.models import User
+# from auth.models import User
 
 
 class Message(Base):

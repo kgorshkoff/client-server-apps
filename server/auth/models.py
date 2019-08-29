@@ -8,12 +8,12 @@ from echo.models import Message
 
 class User(Base):
     __tablename__ = 'users'
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     password = Column(String, nullable=False)
-    sessions = relationship('Session', backref='sessions')
-    messages = relationship('Message', backref='messages')
+    sessions = relationship('Session', back_populates='user')
+    messages = relationship('Message', back_populates='user')
 
 
 class Session(Base):
@@ -22,4 +22,4 @@ class Session(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     created = Column(DateTime, default=datetime.now())
     user_id = Column(ForeignKey('users.id'))
-    user = relationship('User', back_populates='users')
+    user = relationship('User', back_populates='sessions')
