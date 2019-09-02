@@ -3,7 +3,8 @@ import os
 
 INSTALLED_MODULES = (
     'auth',
-    'echo', 
+    'echo',
+    'security',
     'messenger',
     'serverdate',
     'servererrors',

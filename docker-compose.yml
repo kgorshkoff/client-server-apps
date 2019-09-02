@@ -7,12 +7,10 @@ services:
     volumes:
       - ./server:/app
     ports:
-      - 8000
+      - 8000:8000
 
-  client:
-    build: ./client
-    command: python . -c config.yml
+  docs:
+    build: ./docs
+    command: make html
     volumes:
-      - ./client:/app
-    depends_on:
-      - server
+      - ./docs:/app

@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 import os
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,3 +10,16 @@ from settings import CONNECTION_STRING
 engine = create_engine(CONNECTION_STRING)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
+
+
+@contextmanager
+def session_scope():
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()

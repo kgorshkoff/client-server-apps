@@ -8,7 +8,8 @@ from socket import socket
 from datetime import datetime
 from protocol import make_request
 
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from Crypto.Cipher import AES
+from utils import get_chunk
 
 
 class TypedProperty:
@@ -31,36 +32,44 @@ class TypedProperty:
 
 class Application:
     def __init__(self, args):
-        self._host = TypedProperty('host', str, args.host if args.host else 'localhost')
+        self._host = TypedProperty('host', str, args.host if args.host else '0.0.0.0')
         self._port = TypedProperty('port', int, args.port if args.port else 8000)
         self._buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
         
         self._username = input('Enter your name: ')   
-        self._sock = None
+        self._sock = socket()
 
     def __enter__(self):
-        if not self._sock:
-            self._sock = socket()
+        self._sock.connect((self._host.default, self._port.default))
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         message = 'Client shutdown'
         if exc_type:
-            if not exc_type is KeyboardInterrupt:
+            if exc_type is not KeyboardInterrupt:
                 message = 'Client stopped with error'
-        logging.info(message)
+        logging.info(message, exc_info=exc_val)
         self._sock.close()
         return True
     
     def connect(self):
-        if not self._sock:
-            self._sock = socket()
-        self._sock.connect((self._host.default, self._port.default))
-    
+        try:
+            self._sock.connect((self._host.default, self._port.default))
+        except Exception as e:
+            print(e)
+
     def read(self):
         compressed_response = self._sock.recv(self._buffersize.default)
-        b_response = zlib.decompress(compressed_response)
-        response = b_response.decode()
+        encrypted_response = zlib.decompress(compressed_response)
+
+        nonce, encrypted_response = get_chunk(encrypted_response, 16)
+        key, encrypted_response = get_chunk(encrypted_response, 16)
+        tag, encrypted_response = get_chunk(encrypted_response, 16)
+
+        cipher = AES.new(key, AES.MODE_EAX, nonce)
+
+        raw_response = cipher.decrypt_and_verify(encrypted_response, tag)
+        response = raw_response.decode()
         
         logging.debug(f'Client recieved response: {response}')
         
@@ -73,27 +82,32 @@ class Application:
         else:
             print(response)
     
-    # def write(self):
-    #     action = input('Enter action: ')
-    #     data = input('Enter data: ')
-    #
-    #     hash_obj = hashlib.sha256()
-    #     hash_obj.update(
-    #         str(datetime.now().timestamp()).encode()
-    #     )
-    #     token = hash_obj.hexdigest()
-    #
-    #     request = make_request(self._username, action, data, token)
-    #
-    #     s_request = json.dumps(request)
-    #     b_request = zlib.compress(s_request.encode())
-    #
-    #     self._sock.send(b_request)
-    #     logging.debug(f'Client sent data: {data}')
+    def write(self):
+        key = get_random_bytes(16)
+        cipher = AES.key(key, AES.MODE_EAX)
 
-    def render(self):
-        window = QMainWindow()
-        window.show()
+        hash_obj = hashlib.sha256()
+        hash_obj.update(
+            str(datetime.now().timestamp()).encode()
+        )
+        token = hash_obj.hexdigest()
+
+        action = input('Enter action: ')
+        data = input('Enter data: ')
+
+        request = make_request(self._username, action, data, token)
+
+        b_request = json.dumps(request).encode()
+        encrypted_request = cipher.encrypt_and_digest(b_request)
+
+        b_request = zlib.compress(
+            b'%(nonce)s%(key)s%(tag)s%(data)s' % {
+                b'nonce': cipher.nonce, b'key': key, b'tag': tag, b'data': encrypted_request
+            }
+        )
+
+        self._sock.send(b_request)
+        logging.debug(f'Client sent data: {data}')
 
     def run(self):
         read_thread = threading.Thread(target=self.read)
@@ -101,6 +115,5 @@ class Application:
 
         logging.info(f'Client started and connected to {self._host.default}:{self._port.default}')
 
-        app = QApplication(sys.argv)
-
-        sys.exit(app.__exec())
+        while True:
+            self.write()
