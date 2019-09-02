@@ -1,10 +1,11 @@
+import sys
 import os
 import yaml
 import json
 import logging
 from datetime import datetime
 from argparse import ArgumentParser
-from client.app import Client
+from app import Application
 
 
 parser = ArgumentParser()
@@ -35,9 +36,13 @@ if args.config:
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler(os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_client_main.log')]
+    handlers=[
+        logging.FileHandler(
+            os.path.dirname(os.path.abspath(__file__)) + '/logs/' + datetime.today().strftime("%Y%m%d") + '_client_main.log')
+    ]
 )
 
 
-client = Client(args)
-client.run()
+# with Application(args) as client:
+#     client.connect()
+#     client.run()
