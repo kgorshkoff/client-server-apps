@@ -1,3 +1,4 @@
+import sys
 import hashlib
 import json
 import logging
@@ -5,8 +6,9 @@ import threading
 import zlib
 from socket import socket
 from datetime import datetime
-
 from protocol import make_request
+
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
 
 class TypedProperty:
@@ -36,7 +38,6 @@ class Application:
         self._username = input('Enter your name: ')   
         self._sock = None
 
-    
     def __enter__(self):
         if not self._sock:
             self._sock = socket()
@@ -72,29 +73,34 @@ class Application:
         else:
             print(response)
     
-    def write(self):
-        action = input('Enter action: ')
-        data = input('Enter data: ')
-        
-        hash_obj = hashlib.sha256()
-        hash_obj.update(
-            str(datetime.now().timestamp()).encode()
-        )
-        token = hash_obj.hexdigest()
-        
-        request = make_request(self._username, action, data, token)
-        
-        s_request = json.dumps(request)
-        b_request = zlib.compress(s_request.encode())
-        
-        self._sock.send(b_request)
-        logging.debug(f'Client sent data: {data}')
-    
+    # def write(self):
+    #     action = input('Enter action: ')
+    #     data = input('Enter data: ')
+    #
+    #     hash_obj = hashlib.sha256()
+    #     hash_obj.update(
+    #         str(datetime.now().timestamp()).encode()
+    #     )
+    #     token = hash_obj.hexdigest()
+    #
+    #     request = make_request(self._username, action, data, token)
+    #
+    #     s_request = json.dumps(request)
+    #     b_request = zlib.compress(s_request.encode())
+    #
+    #     self._sock.send(b_request)
+    #     logging.debug(f'Client sent data: {data}')
+
+    def render(self):
+        window = QMainWindow()
+        window.show()
+
     def run(self):
         read_thread = threading.Thread(target=self.read)
         read_thread.start()
 
-        while True:
-            self.write()
-            logging.info(f'Client started and connected to {self._host.default}:{self._port.default}')
-            print('Welcome to geek-chat!')
+        logging.info(f'Client started and connected to {self._host.default}:{self._port.default}')
+
+        app = QApplication(sys.argv)
+
+        sys.exit(app.__exec())

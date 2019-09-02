@@ -1,1 +1,9 @@
 pyyaml
+PyQT5
+chardet
+pyyaml
+requests
+pytest
+pytest-cov
+fabric3
+sqlalchemy

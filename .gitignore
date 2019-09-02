@@ -1,6 +1,6 @@
 .idea/
 .vscode/
-
+*/logs/
 notebook/
 .ipynb_checkpoints
 .DS_Store
@@ -131,5 +131,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/server/logs/
-/client/logs/

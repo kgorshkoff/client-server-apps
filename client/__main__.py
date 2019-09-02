@@ -1,3 +1,4 @@
+import sys
 import os
 import yaml
 import json
@@ -35,10 +36,13 @@ if args.config:
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler(os.getcwd() + '/logs/' + datetime.today().strftime("%Y%m%d") + '_client_main.log')]
+    handlers=[
+        logging.FileHandler(
+            os.path.dirname(os.path.abspath(__file__)) + '/logs/' + datetime.today().strftime("%Y%m%d") + '_client_main.log')
+    ]
 )
 
 
-with Application(args) as client:
-    client.connect()
-    client.run()
+# with Application(args) as client:
+#     client.connect()
+#     client.run()

@@ -9,10 +9,11 @@ from .models import Message
 @logged
 def echo_controller(request):
     data = request.get('data')
-    username = request.get('username')
+    # username = request.get('username')
     
     session = Session()
-    message = Message(data=data, user=username)
+    # message = Message(data=data, user=username)
+    message = Message(data=data)
     session.add(message)
     session.commit()
     
@@ -23,7 +24,7 @@ def echo_controller(request):
 def get_messages_controller(request):
     session = Session()
     messages = reduce(
-        lambda value, item: value + [{'data': item.data, 'created': item.created}],
+        lambda value, item: value + [{'data': item.data, 'created': item.created.timestamp()}],
         session.query(Message).all(),
         []
     )
