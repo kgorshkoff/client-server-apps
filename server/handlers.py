@@ -1,8 +1,9 @@
 import json
 import logging
 
-from middleware import compression_middleware, encryption_middleware
 from resolvers import resolve
+from middleware import compression_middleware
+from security.middleware import encryption_middleware
 from protocol import make_response, validate_request
 
 
@@ -16,10 +17,10 @@ def handle_default_request(raw_request):
         controller = resolve(action_name)
         if controller:
             try:
-                logging.debug(f'Controller {action_name} resolved with request: {raw_request.decode()}')
+                logging.debug(f'Controller {action_name} resolved with request: {raw_request}')
                 response = controller(request)
             except Exception as err:
-                logging.critical(f'Controller {action_name} error {err}')
+                logging.critical(f'Controller {action_name} error {err}', exc_info=err)
                 response = make_response(request, 500, 'Internal server error')
         else:
             logging.error(f'Controller {action_name} not found')

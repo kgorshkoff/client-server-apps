@@ -2,10 +2,12 @@ import hmac
 from database import Session, session_scope
 from auth.models import User
 from datetime import datetime
+
+from decorators import login_required
 from protocol import make_response
 
-from utils import authenticate, login
-from settings import SECRET_KEY
+from .utils import authenticate, login
+from .settings import SECRET_KEY
 
 
 def login_controller(request):
@@ -65,6 +67,7 @@ def registration_controller(request):
     return response
 
 
+@login_required
 def logout_controller(request):
     with session_scope() as db_session:
         user_session = db_session.query(Session).filter_by(token=request.get('token')).first()

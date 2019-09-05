@@ -1,9 +1,8 @@
 from datetime import datetime
 
 
-def make_request(username, action, data, token):
+def make_request(action, data, token):
     result = {
-        'username': username,
         'action': action,
         'time': datetime.now().timestamp(),
         'data': data,

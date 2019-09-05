@@ -9,6 +9,7 @@ from datetime import datetime
 from protocol import make_request
 
 from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 from utils import get_chunk
 
 
@@ -36,7 +37,6 @@ class Application:
         self._port = TypedProperty('port', int, args.port if args.port else 8000)
         self._buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
         
-        self._username = input('Enter your name: ')   
         self._sock = socket()
 
     def __enter__(self):
@@ -72,19 +72,12 @@ class Application:
         response = raw_response.decode()
         
         logging.debug(f'Client recieved response: {response}')
-        
-        if 'messenger' in response:
-            json_response = json.loads(response)
-            print(
-                f"{datetime.fromtimestamp(json_response.get('time')).strftime('%H:%M:%S')} | \
-                    {json_response.get('username')}: {json_response.get('data')}\n"
-                )
-        else:
-            print(response)
+
+        print(response)
     
     def write(self):
         key = get_random_bytes(16)
-        cipher = AES.key(key, AES.MODE_EAX)
+        cipher = AES.new(key, AES.MODE_EAX)
 
         hash_obj = hashlib.sha256()
         hash_obj.update(
@@ -95,10 +88,10 @@ class Application:
         action = input('Enter action: ')
         data = input('Enter data: ')
 
-        request = make_request(self._username, action, data, token)
+        request = make_request(action, data, token)
 
         b_request = json.dumps(request).encode()
-        encrypted_request = cipher.encrypt_and_digest(b_request)
+        encrypted_request, tag = cipher.encrypt_and_digest(b_request)
 
         b_request = zlib.compress(
             b'%(nonce)s%(key)s%(tag)s%(data)s' % {

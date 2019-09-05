@@ -67,7 +67,6 @@ class Server:
             b_request = sock.recv(self._buffersize.default)
         except Exception:
             self._connections.remove(sock)
-            logging.info(f'Client disconnected: {address[0]}:{address[1]} | connections: {len(self._connections)}')
         else:
             if b_request:
                 self._requests.append(b_request)
