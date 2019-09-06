@@ -14,3 +14,4 @@ services:
     command: make html
     volumes:
       - ./docs:/app
+      - ./server:/app/server

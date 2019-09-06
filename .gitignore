@@ -6,7 +6,8 @@ notebook/
 .DS_Store
 client-server-apps.code-workspace
 sqlite.db
-docs/
+docs/build/
+docs/server/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
