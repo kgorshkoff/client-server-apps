@@ -7,10 +7,12 @@ import zlib
 from socket import socket
 from datetime import datetime
 from protocol import make_request
+from utils import get_chunk
 
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from utils import get_chunk
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QTextEdit, QVBoxLayout, QLineEdit, QWidget
 
 
 class TypedProperty:
@@ -36,7 +38,7 @@ class Application:
         self._host = TypedProperty('host', str, args.host if args.host else '0.0.0.0')
         self._port = TypedProperty('port', int, args.port if args.port else 8000)
         self._buffersize = TypedProperty('buffersize', int, args.buffersize if args.buffersize else 1024)
-        
+        self._message_received = pyqtSignal(dict)
         self._sock = socket()
 
     def __enter__(self):
@@ -51,7 +53,11 @@ class Application:
         logging.info(message, exc_info=exc_val)
         self._sock.close()
         return True
-    
+
+    @property
+    def message_received(self):
+        return self._message_receved
+
     def connect(self):
         try:
             self._sock.connect((self._host.default, self._port.default))
@@ -59,22 +65,54 @@ class Application:
             print(e)
 
     def read(self):
-        compressed_response = self._sock.recv(self._buffersize.default)
-        encrypted_response = zlib.decompress(compressed_response)
+        while True:
+            compressed_response = self._sock.recv(self._buffersize.default)
+            encrypted_response = zlib.decompress(compressed_response)
 
-        nonce, encrypted_response = get_chunk(encrypted_response, 16)
-        key, encrypted_response = get_chunk(encrypted_response, 16)
-        tag, encrypted_response = get_chunk(encrypted_response, 16)
+            nonce, encrypted_response = get_chunk(encrypted_response, 16)
+            key, encrypted_response = get_chunk(encrypted_response, 16)
+            tag, encrypted_response = get_chunk(encrypted_response, 16)
 
-        cipher = AES.new(key, AES.MODE_EAX, nonce)
+            cipher = AES.new(key, AES.MODE_EAX, nonce)
 
-        raw_response = cipher.decrypt_and_verify(encrypted_response, tag)
-        response = raw_response.decode()
-        
-        logging.debug(f'Client recieved response: {response}')
+            raw_response = cipher.decrypt_and_verify(encrypted_response, tag)
+            logging.info(raw_response.decode())
+            response = json.loads(raw_response)
+            data = response.get('data')
+            self.display_text.append(data.get('data'))
 
-        print(response)
-    
+            logging.debug(f'Client received response: {raw_response.decode()}')
+
+    def render(self):
+        app = QApplication(sys.argv)
+        window = QMainWindow()
+        window.setGeometry(400, 600, 400, 600)
+
+        central_widget = QWidget()
+
+        display_text = QTextEdit()
+        display_text.setReadOnly(True)
+        enter_text = QLineEdit()
+
+        base_layout = QVBoxLayout()
+        base_layout.addWidget(display_text)
+        base_layout.addWidget(enter_text)
+
+        central_widget.setLayout(base_layout)
+        window.setCentralWidget(central_widget)
+
+        dsk_widget = QDesktopWidget()
+        geometry = dsk_widget.availableGeometry()
+        center_position = geometry.center()
+        frame_geometry = geometry.frameGeometry()
+        frame_geometry.moveCenter(center_position)
+        windows.move(frame_geometry.topLeft())
+
+        self.send_button.clicked.connect(self.write)
+
+        window.show()
+        sys.exit(app.exec_())
+
     def write(self):
         key = get_random_bytes(16)
         cipher = AES.new(key, AES.MODE_EAX)
@@ -108,5 +146,4 @@ class Application:
 
         logging.info(f'Client started and connected to {self._host.default}:{self._port.default}')
 
-        while True:
-            self.write()
+        self.render()

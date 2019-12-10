@@ -36,6 +36,7 @@ class Server:
     def __enter__(self):
         if not self._sock:
             self._sock = socket()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         message = 'Server shutdown'
@@ -66,7 +67,8 @@ class Server:
         try:
             b_request = sock.recv(self._buffersize.default)
         except Exception:
-            self._connections.remove(sock)
+            # self._connections.remove(sock)
+            logging.critical('Read exception raised', exc_info=err)
         else:
             if b_request:
                 self._requests.append(b_request)
@@ -76,6 +78,7 @@ class Server:
             sock.send(response)
         except Exception:
             self._connections.remove(sock)
+            logging.critical('Write exception raised', exc_info=err)
 
     def run(self):
         try:

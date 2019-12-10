@@ -7,10 +7,11 @@ from security.middleware import encryption_middleware
 from protocol import make_response, validate_request
 
 
+
 @compression_middleware
 @encryption_middleware
 def handle_default_request(raw_request):
-    request = json.loads(raw_request.decode())
+    request = json.loads(raw_request)
 
     if validate_request(request):
         action_name = request.get('action')

@@ -9,7 +9,7 @@ from .models import Message
 @logged
 def echo_controller(request):
     data = request.get('data')
-    message = data.get('text')
+    message = Message(data=data)
     with session_scope() as db_session:
         db_session.add(message)
 

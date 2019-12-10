@@ -1,5 +1,5 @@
 pyyaml
-PyQT5
+PyQt5
 chardet
 pyyaml
 requests
