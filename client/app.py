@@ -12,7 +12,8 @@ from utils import get_chunk
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDesktopWidget, QTextEdit, QVBoxLayout, QLineEdit, QWidget
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QDesktopWidget, QTextEdit,
+                             QVBoxLayout, QHBoxLayout, QLineEdit, QWidget, QPushButton)
 
 
 class TypedProperty:
@@ -51,7 +52,7 @@ class Application:
             if exc_type is not KeyboardInterrupt:
                 message = 'Client stopped with error'
         logging.info(message, exc_info=exc_val)
-        self._sock.close()
+        # self._sock.close()
         return True
 
     @property
@@ -90,13 +91,23 @@ class Application:
 
         central_widget = QWidget()
 
-        display_text = QTextEdit()
-        display_text.setReadOnly(True)
-        enter_text = QLineEdit()
+        self.display_text = QTextEdit()
+        self.display_text.setReadOnly(True)
+        self.enter_text = QTextEdit()
+        self.send_button = QPushButton('Send', window)
+        self.enter_text.setMaximumHeight(64)
+        self.send_button.setMaximumHeight(64)
 
         base_layout = QVBoxLayout()
-        base_layout.addWidget(display_text)
-        base_layout.addWidget(enter_text)
+        top_layout = QHBoxLayout()
+        footer_layout = QHBoxLayout()
+
+        top_layout.addWidget(self.display_text)
+        footer_layout.addWidget(self.enter_text)
+        footer_layout.addWidget(self.send_button)
+
+        base_layout.addLayout(top_layout)
+        base_layout.addLayout(footer_layout)
 
         central_widget.setLayout(base_layout)
         window.setCentralWidget(central_widget)
