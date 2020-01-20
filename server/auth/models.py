@@ -20,6 +20,8 @@ class Session(Base):
     __tablename__ = 'sessions'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
+    token = Column(String, nullable=False, unique=True)
     created = Column(DateTime, default=datetime.now())
+    closed = Column(DateTime, nullable=True)
     user_id = Column(ForeignKey('users.id'))
     user = relationship('User', back_populates='sessions')

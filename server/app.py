@@ -33,6 +33,20 @@ class Server:
         self._requests = list()
         self._connections = list()
 
+    def __enter__(self):
+        if not self._sock:
+            self._sock = socket()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        message = 'Server shutdown'
+        if exc_type:
+            if exc_type is not KeyboardInterrupt:
+                message = 'Server stopped with error'
+        logging.info(message, exc_info=exc_val)
+        self._sock.close()
+        return True
+
     def accept(self):
         try:
             client, address = self._sock.accept()
@@ -43,6 +57,8 @@ class Server:
             logging.info(f'Client connected: {address[0]}:{address[1]} | connections: {len(self._connections)}')
 
     def bind(self, backlog=5):
+        if not self._sock:
+            self._sock = socket()
         self._sock.bind((self._host.default, self._port.default))
         self._sock.settimeout(0)
         self._sock.listen(backlog)
@@ -50,8 +66,9 @@ class Server:
     def read(self, sock):
         try:
             b_request = sock.recv(self._buffersize.default)
-        except Exception:
-            self._connections.remove(sock)
+        except Exception as err:
+            # self._connections.remove(sock)
+            logging.critical('Read exception raised', exc_info=err)
         else:
             if b_request:
                 self._requests.append(b_request)
@@ -59,8 +76,9 @@ class Server:
     def write(self, sock, response):
         try:
             sock.send(response)
-        except Exception:
-            self._connections.remove(sock)
+        except Exception as err:
+            # self._connections.remove(sock)
+            logging.critical('Write exception raised', exc_info=err)
 
     def run(self):
         try:

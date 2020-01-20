@@ -43,6 +43,5 @@ logging.basicConfig(
 )
 
 
-# with Application(args) as client:
-#     client.connect()
-#     client.run()
+with Application(args) as client:
+    client.run()
