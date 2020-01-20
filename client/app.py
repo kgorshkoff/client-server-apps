@@ -80,7 +80,7 @@ class Application:
             logging.info(raw_response.decode())
             response = json.loads(raw_response)
             data = response.get('data')
-            self.display_text.append(data.get('data'))
+            self.display_text.append(data)
 
             logging.debug(f'Client received response: {raw_response.decode()}')
 
@@ -90,6 +90,7 @@ class Application:
         window.setGeometry(400, 600, 400, 600)
 
         central_widget = QWidget()
+        login_widget = QWidget()
 
         self.display_text = QTextEdit()
         self.display_text.setReadOnly(True)
@@ -98,9 +99,26 @@ class Application:
         self.enter_text.setMaximumHeight(64)
         self.send_button.setMaximumHeight(64)
 
+        self.login = QTextEdit()
+        self.password = QTextEdit()
+        self.login_button = QPushButton('Login', login_window)
+        self.register_button = QPushButton('Register', login_window)
+        self.login.setMaximumHeight(64)
+        self.password.setMaximumHeight(64)
+        self.register_button.setMaximumHeight(64)
+        self.login_button.setMaximumHeight(64)
+
         base_layout = QVBoxLayout()
         top_layout = QHBoxLayout()
         footer_layout = QHBoxLayout()
+
+        login_top_layout = QVBoxLayout()
+        login_footer_layout = QHBoxLayout()
+
+        login_top_layout.addWidget(self.login)
+        login_top_layout.addWidget(self.password)
+        login_footer_layout.addWidget(self.login_button)
+        login_footer_layout.addWidget(self.register_button_button)
 
         top_layout.addWidget(self.display_text)
         footer_layout.addWidget(self.enter_text)
@@ -109,18 +127,24 @@ class Application:
         base_layout.addLayout(top_layout)
         base_layout.addLayout(footer_layout)
 
+        login_widget.setLayout(login_layout)
+        login_window.setCentralWidget(login_widget)
+
+        login_widget.show()
+
         central_widget.setLayout(base_layout)
         window.setCentralWidget(central_widget)
 
         dsk_widget = QDesktopWidget()
         geometry = dsk_widget.availableGeometry()
         center_position = geometry.center()
-        frame_geometry = geometry.frameGeometry()
+        frame_geometry = window.frameGeometry()
         frame_geometry.moveCenter(center_position)
-        windows.move(frame_geometry.topLeft())
+        window.move(frame_geometry.topLeft())
 
         self.send_button.clicked.connect(self.write)
 
+        # login_window.show()
         window.show()
         sys.exit(app.exec_())
 
@@ -134,10 +158,9 @@ class Application:
         )
         token = hash_obj.hexdigest()
 
-        action = input('Enter action: ')
-        data = input('Enter data: ')
+        data = self.enter_text.toPlainText()
 
-        request = make_request(action, data, token)
+        request = make_request('echo', {'data': data}, token)
 
         b_request = json.dumps(request).encode()
         encrypted_request, tag = cipher.encrypt_and_digest(b_request)
@@ -148,6 +171,7 @@ class Application:
             }
         )
 
+        self.enter_text.clear()
         self._sock.send(b_request)
         logging.debug(f'Client sent data: {data}')
 

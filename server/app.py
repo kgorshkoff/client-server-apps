@@ -66,7 +66,7 @@ class Server:
     def read(self, sock):
         try:
             b_request = sock.recv(self._buffersize.default)
-        except Exception:
+        except Exception as err:
             # self._connections.remove(sock)
             logging.critical('Read exception raised', exc_info=err)
         else:
@@ -76,8 +76,8 @@ class Server:
     def write(self, sock, response):
         try:
             sock.send(response)
-        except Exception:
-            self._connections.remove(sock)
+        except Exception as err:
+            # self._connections.remove(sock)
             logging.critical('Write exception raised', exc_info=err)
 
     def run(self):
